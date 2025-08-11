@@ -1,0 +1,36 @@
+#SLICE
+import os
+import xarray as xr
+
+# Folder input dan output
+input_root = r"D:\tes\SST"
+output_root = r"D:\tes\SST_output"
+
+# Loop semua subfolder dan file
+for root, dirs, files in os.walk(input_root):
+    for file in files:
+        if file.endswith(".nc"):
+            input_path = os.path.join(root, file)
+
+            # Subfolder relatif dari folder root
+            relative_subfolder = os.path.relpath(root, input_root)
+            output_subfolder = os.path.join(output_root, relative_subfolder)
+
+            # Buat folder output jika belum ada
+            os.makedirs(output_subfolder, exist_ok=True)
+
+            # Nama file output
+            filename_only = os.path.splitext(file)[0]
+            output_filename = f"{filename_only}_slice.nc"
+            output_path = os.path.join(output_subfolder, output_filename)
+
+            print(f"Processing: {input_path}")
+
+            # Buka dan potong data
+            ds = xr.open_dataset(input_path)
+            ds_subset = ds.sel(latitude=slice(-7.2, -5), longitude=slice(109, 112))
+
+            # Simpan hasil
+            ds_subset.to_netcdf(output_path)
+            print(f"Saved to: {output_path}")
+			
